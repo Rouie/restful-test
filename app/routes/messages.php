@@ -23,7 +23,8 @@ $app->post($url, function() use($link){
     $ret = mysqli_query($link, $query);
 
     if($ret){
-        Response::Created("Message was successfully created.");
+        $messageID = mysqli_insert_id($link);
+        Response::Created($url . "/$messageID");
     }
 });
 
