@@ -30,5 +30,33 @@ $app->post($url, function() use($link){
 $app->get($url, function() use($link){
     $query = "SELECT * FROM messages";
     $ret = mysqli_query($link, $query);
+    $results = array();
+    
+    if($ret){
+        while($row = mysqli_fetch_assoc($ret)){
+            $results[] = $row;
+        }
+        
+        Response::Ok($results, JSON_PRETTY_PRINT);
+    }
+});
+
+$app->get($url . "/:messageID", function($messageID) use($link){
+    $query = "SELECT * FROM messages WHERE messageID=$messageID";
+    $ret = mysqli_query($link, $query);
+    $result = mysqli_fetch_assoc($ret);
+    
+    if(mysqli_num_rows <= 0)
+        Response::NotFound("Message with ID $messageID does not exists.");
+    
+    $return = [
+        "messageID"=>$result["messageID"],
+        "senderID"=>$result["senderID"],
+        "receiverID"=>$result["receiverID"],
+        "message"=>$result["message"],
+        "dateTime"=>$result["dateTime"]
+    ];
+    
+    Response::Ok($return, JSON_PRETTY_PRINT);
 });
 ?>
