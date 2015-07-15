@@ -68,15 +68,19 @@ $app->delete($url . "/:accountID", function($accountID) use($link){
     }
 });
 
-$app->put($url . "/:id/:firstName", function($id, $firstName) use($link){
-    $query = "UPDATE accounts SET firstName='$firstName' WHERE id=$id";
+$app->put($url, function(){
+    Response::NotFound("Can't update all accounts simultaneously.");
+});
+
+$app->put($url . "/:id", function($accountID) use($link){
+    $query = "UPDATE accounts SET firstName='{$_POST["firstName"]}', lastName='{$_POST["lastName"]}' WHERE accountID=$accountID";
     $ret = mysqli_query($link, $query);
     $num_rows = mysqli_num_rows($ret);
     
     if($num_rows <= 0){
-        Response::NotFound("First name with account ID $id does not exists.");
+        Response::NotFound("Account with ID $accountID does not exists.");
     }
     
-    Response::Ok("First name with account ID $id was successfully changed to $firstname");
+    echo $app->request->put("account");
 });
 ?>

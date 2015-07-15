@@ -2,18 +2,22 @@
 $url = "/messages";
 
 function doesAccountExists($accountID){
-    echo intval($accountID);
+    global $link;
+    
+    if(intval($accountID) <= 0)
+        Response::NotFound("Account with ID $accountID does not exists.");
+    
     $query = "SELECT * FROM accounts WHERE accountID=$accountID";
     $ret = mysqli_query($link, $query);
     $num_rows = mysqli_num_rows($ret);
-    
+
     if($num_rows <= 0)
         return false;
-    
+
     return true;
 }
 
-$app->post($url, function() use($link){
+$app->post($url, function() use($url, $link){
     if(!doesAccountExists($_POST["senderID"]))
         Response::NotFound("Sender does not exists.");
     if(!doesAccountExists($_POST["receiverID"]))
@@ -78,5 +82,18 @@ $app->delete($url . "/:id", function($messageID) use($link){
         Response::NotFound("Message with ID $messageID does not exists.");
     
     Response::Ok("Message was successfully deleted.");
+});
+
+$app->put($url, function(){
+    Response::NotFound("Can't update all messages simultaneously.");
+});
+
+$app->put($url . "/:id", function($messageID) use($app, $link){
+    $query = "UPDATE messages SET message='{$_POST["message"]}' WHERE messageID=$messageID";
+    $ret = mysqli_query($link, $query);
+    
+    if(mysqli_num_rows($ret) <= 0)
+        Response::NotFound("Message with ID $messageID does not exists.");
+    echo $app->request->put("message");
 });
 ?>
